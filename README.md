@@ -110,7 +110,9 @@ Parent Run: optuna_xgboost_regression
 
 #### Retrieving the Best Model
 
-After training, the best child run ID is logged as a parameter (`best_child_run_id`) on the parent run. The API (`app.py`) loads the model directly using this run ID:
+After training, the best child run ID is logged as a parameter (`best_child_run_id`) on the parent run. The API (`app.py`) loads the model directly using this run ID. You can easily find the best run visually in the MLflow UI:
+
+![Trials RMSE Bars](trials_rmse_bars.png)
 
 ```python
 # Replace with your actual run ID from MLflow
