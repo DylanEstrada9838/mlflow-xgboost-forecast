@@ -10,20 +10,19 @@ def create_features(df, lag):
     df["quarter"] = df.index.quarter
     #df["dayofyear"] = df.index.dayofyear
 
-    # Create lag features
-    df[f"sales_lag_{lag}"] = df["sales"].shift(lag)
+    # Create lag features PER store and item
+    df[f"sales_lag_{lag}"] = df.groupby(["store", "item"])["sales"].shift(lag)
     
     return df
 
 
-def get_weekly_df(store, item):
+def get_weekly_df():
     df = pd.read_csv("data/raw/train.csv")
     df["date"] = pd.to_datetime(df["date"])
-    df.set_index("date", inplace=True)
-    df = df[(df["store"] == store) & (df["item"] == item)]
-    weekly_df = df["sales"].resample("W").sum().to_frame()
+    # Group by store and item, resample to weekly, and put store/item back as columns
+    weekly_df = df.groupby(["store", "item"]).resample("W", on="date")["sales"].sum().reset_index(["store", "item"])
     features_df = create_features(weekly_df, lag=52).dropna()
-    return features_df
+    return features_df.sort_index()
 
 
 def split_train_test(

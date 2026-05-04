@@ -9,16 +9,18 @@ import os
 
 app = FastAPI(title="Weekly Sales Forecasting API")
 
-RUN_ID = "1c6b07c974cc4ac190b824884e5002bc"
+RUN_ID = "5f790ebec7e74223be851161bb0e8311"
 model  = mlflow.xgboost.load_model(f"runs:/{RUN_ID}/model")
 
 
 FEATURES = [
-    "year","weekofyear", "month", "quarter", "sales_lag_52"
+    "store", "item", "year", "weekofyear", "month", "quarter", "sales_lag_52"
 ]
 
 # --- Schemas ---
 class SingleRequest(BaseModel):
+    store:         int
+    item:          int
     date:          date
     lag_52:        float    # sales same week last year
 
@@ -54,6 +56,8 @@ def root():
 def predict_single(req: SingleRequest):
     """Predict sales for a single week given pre-computed features."""
     row  = {
+        "store":          req.store,
+        "item":           req.item,
         "year":           req.date.year,
         "weekofyear":   req.date.isocalendar()[1],
         "month":          req.date.month,

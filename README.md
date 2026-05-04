@@ -28,22 +28,24 @@ forecast_xgboost/
 
 The raw dataset contains daily sales for multiple stores and items. The pipeline:
 
-1. **Filters** records for a specific `store` + `item` combination.
-2. **Resamples** daily data to **weekly frequency** (sum of sales per week).
+1. **Groups** the records by `store` and `item` to retain the full scope of the dataset.
+2. **Resamples** daily data to **weekly frequency** per store and item (sum of sales per week).
 3. **Creates calendar features**: `year`, `weekofyear`, `month`, `quarter`.
-4. **Creates a lag feature**: `sales_lag_52` — sales from exactly 52 weeks ago (same week, previous year). This captures strong yearly seasonality.
+4. **Creates a lag feature**: `sales_lag_52` — sales from exactly 52 weeks ago (same week, previous year) calculated independently per store and item.
 5. **Drops NaN rows** introduced by the lag.
-6. **Splits** the dataset into train and test sets by date.
+6. **Sorts by date** and **splits** the dataset into train and test sets by date.
 
 **Final feature set used for training:**
 
 | Feature | Description |
 |---|---|
+| `store` | Unique identifier for the store |
+| `item` | Unique identifier for the item |
 | `year` | Calendar year |
 | `weekofyear` | ISO week number (1–52) |
 | `month` | Month of year (1–12) |
 | `quarter` | Quarter of year (1–4) |
-| `sales_lag_52` | Sales from the same week one year ago |
+| `sales_lag_52` | Sales from the same week one year ago (per store & item) |
 
 ---
 
@@ -138,7 +140,7 @@ A [FastAPI](https://fastapi.tiangolo.com/) service exposes the best trained mode
 ```bash
 curl -X POST http://localhost:8000/predict/single \
   -H "Content-Type: application/json" \
-  -d '{"date": "2017-06-05", "lag_52": 420.0}'
+  -d '{"store": 1, "item": 1, "date": "2017-06-05", "lag_52": 420.0}'
 ```
 
 #### Example Response
@@ -214,7 +216,7 @@ Then visit [http://localhost:8000/docs](http://localhost:8000/docs) for the inte
 
 ## 📊 Results
 
-| Metric | Value (Best Trial — Store 1, Item 1, Test Year 2017) |
+| Metric | Value (Best Trial — All Stores & Items, Test Year 2017) |
 |---|---|
 | RMSE | logged in MLflow |
 | MAPE | logged in MLflow |

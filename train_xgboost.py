@@ -10,14 +10,13 @@ import numpy as np
 
 
 
-mlflow.set_experiment("Hyperparameter Tuning XGBoost 2017 30 trials")
-#mlflow.xgboost.autolog()
-
+mlflow.set_experiment("Hyperparameter Tuning XGBoost 2017 30 trials_V2")
 
 def run_training(
-    store, item, train_start_date, train_end_date, test_start_date, test_end_date
+    train_start_date, train_end_date, test_start_date, test_end_date
 ):
-    features_df = get_weekly_df(store, item)
+    features_df = get_weekly_df()
+
     train_df, test_df = split_train_test(
         features_df, train_start_date, train_end_date, test_start_date, test_end_date
     )
@@ -42,8 +41,7 @@ def run_training(
             "eval_metric":    "rmse",
             "random_state":   42
             }
-        
-        # Setting nested=True will create a child run under the parent run.
+        #Child
         with mlflow.start_run(nested=True, run_name=f"trial_{trial.number}") as child_run:
             # Log current trial's parameters
             mlflow.log_params(params)
@@ -66,14 +64,13 @@ def run_training(
             trial.set_user_attr("run_id", child_run.info.run_id)
             return rmse
 
-    # Create a parent run that contains all child runs for different trials
+    #Parent
     with mlflow.start_run(run_name="optuna_xgboost_regression") as parent_run:
         mlflow.set_tag("model",     "xgboost")
         mlflow.set_tag("optimizer", "optuna")
         mlflow.set_tag("task",      "regression")
         mlflow.set_tag("dataset",   "sales_stores")
-        mlflow.set_tag("Store", store)
-        mlflow.set_tag("Item", item)
+        mlflow.set_tag("Scope", "All Stores and Items")
 
         # Log parameters with MLflow
         mlflow.log_param("train_start_date", train_start_date)
@@ -95,8 +92,6 @@ def run_training(
 
 if __name__ == "__main__":
     run_training(
-        store=1,
-        item=1,
         train_start_date="2014-01-01",
         train_end_date="2016-12-31",
         test_start_date="2017-01-01",
