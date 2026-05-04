@@ -1,4 +1,4 @@
-# 🛒 Weekly Sales Forecasting with XGBoost
+# Weekly Sales Forecasting with XGBoost
 
 A production-ready time-series forecasting pipeline that predicts **weekly store sales** using **XGBoost**, **Optuna** for automated hyperparameter tuning, **MLflow** for experiment tracking and model management, and **FastAPI** to serve predictions through a REST API.
 
@@ -239,6 +239,3 @@ Then visit [http://localhost:8000/docs](http://localhost:8000/docs) for the inte
 
 ---
 
-## 📄 License
-
-MIT
